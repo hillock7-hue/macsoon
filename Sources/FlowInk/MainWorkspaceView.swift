@@ -7,6 +7,7 @@ final class MainWorkspaceView: NSView {
     private let deviceLabel = NSTextField(labelWithString: "device: -")
     private let positionLabel = NSTextField(labelWithString: "position: -")
     private let tiltLabel = NSTextField(labelWithString: "tilt: -")
+    private let stabilizerLabel = NSTextField(labelWithString: "stabilizer: light")
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -37,17 +38,18 @@ final class MainWorkspaceView: NSView {
         let title = NSTextField(labelWithString: "FlowInk 1.0 Prototype")
         title.font = .boldSystemFont(ofSize: 14)
 
-        for label in [pressureLabel, sourceLabel, deviceLabel, positionLabel, tiltLabel] {
+        for label in [pressureLabel, sourceLabel, deviceLabel, positionLabel, tiltLabel, stabilizerLabel] {
             label.font = .monospacedSystemFont(ofSize: 12, weight: .regular)
         }
 
         let clearButton = NSButton(title: "清空画布", target: self, action: #selector(clearCanvas))
+        let undoButton = NSButton(title: "撤销上一笔", target: self, action: #selector(undoLastStroke))
 
         let note = NSTextField(wrappingLabelWithString: "当前版本使用 Metal 渲染基础笔刷；没有真实压感时会启用模拟压感，等 PTH-660 接入后切换为硬件压感。")
         note.font = .systemFont(ofSize: 12)
         note.textColor = .secondaryLabelColor
 
-        [title, pressureLabel, sourceLabel, deviceLabel, positionLabel, tiltLabel, clearButton, note].forEach {
+        [title, pressureLabel, sourceLabel, deviceLabel, positionLabel, tiltLabel, stabilizerLabel, undoButton, clearButton, note].forEach {
             panel.addArrangedSubview($0)
         }
         addSubview(panel)
@@ -70,6 +72,10 @@ final class MainWorkspaceView: NSView {
 
     @objc private func clearCanvas() {
         canvasView.clearCanvas()
+    }
+
+    @objc private func undoLastStroke() {
+        canvasView.undoLastStroke()
     }
 
     private func updateHUD(_ sample: CanvasInputSample) {

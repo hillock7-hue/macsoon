@@ -6,6 +6,7 @@ final class CanvasView: MTKView {
 
     private let input = InputInterpreter()
     private let brush = BrushSettings()
+    private let stabilizer = StrokeStabilizer()
     private var renderer: CanvasRenderer!
     private var isDrawing = false
     private var previousSample: CanvasInputSample?
@@ -38,6 +39,11 @@ final class CanvasView: MTKView {
 
     func clearCanvas() {
         renderer.clear()
+    }
+
+    @discardableResult
+    func undoLastStroke() -> Bool {
+        renderer.undoLastStroke()
     }
 
     override func mouseDown(with event: NSEvent) {
@@ -92,14 +98,18 @@ final class CanvasView: MTKView {
 
     private func beginStroke(with event: NSEvent) {
         input.reset()
+        stabilizer.reset()
+        renderer.beginStroke()
         isDrawing = true
-        let sample = input.sample(from: event, in: self, isDrawing: true)
+        let rawSample = input.sample(from: event, in: self, isDrawing: true)
+        let sample = stabilizer.begin(with: rawSample)
         previousSample = sample
         onSample?(sample)
     }
 
     private func continueStroke(with event: NSEvent) {
-        let sample = input.sample(from: event, in: self, isDrawing: true)
+        let rawSample = input.sample(from: event, in: self, isDrawing: true)
+        let sample = stabilizer.smooth(rawSample, settings: brush)
         if let previousSample {
             renderer.addSegment(from: previousSample, to: sample, brush: brush)
         }
@@ -110,8 +120,19 @@ final class CanvasView: MTKView {
     private func endStroke(with event: NSEvent) {
         let sample = input.sample(from: event, in: self, isDrawing: false)
         isDrawing = false
+        renderer.commitStroke()
         previousSample = nil
         input.reset()
+        stabilizer.reset()
         onSample?(sample)
+    }
+
+    override func keyDown(with event: NSEvent) {
+        if event.modifierFlags.contains(.command), event.charactersIgnoringModifiers == "z" {
+            undoLastStroke()
+            return
+        }
+
+        super.keyDown(with: event)
     }
 }

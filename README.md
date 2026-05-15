@@ -11,6 +11,8 @@ The current 1.0 prototype includes:
 - Input abstraction for future Wacom pressure, tilt, buttons, and eraser support.
 - Simulated pressure for mouse/trackpad development before PTH-660 testing.
 - Basic pressure-sensitive stroke rendering.
+- A first-pass adaptive stabilizer for smoother strokes.
+- Per-stroke undo via the HUD button or `Cmd+Z`.
 - Minimal HUD showing pressure source and input data.
 
 ## Build And Run
