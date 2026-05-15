@@ -1,0 +1,12 @@
+.build/
+.home/
+.swiftpm/
+DerivedData/
+*.dmg
+
+# Local test binaries
+tools/WacomNativePressureTest
+tools/wacom_hid_raw_monitor
+
+# macOS noise
+.DS_Store
